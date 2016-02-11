@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
 
 
 #define MAX_LENGTH	128
@@ -40,6 +41,7 @@ void main() {
 	while ( fgets ( line, sizeof line, infile ) != NULL ) /* read a line */
 	{
 		// parse childIDs to get int array and no. of children
+
 		// ptr[count-1] = (struct Node *) malloc(sizeof(struct Node));
 	    	fputs ( line, stdout ); /* write the line */
 	    	token = strtok(line, ":");
@@ -72,6 +74,7 @@ void main() {
 		//printf("%s\n", nodesArray[count-1].output);
 	    
 	    	nodesArray[count-1].id = count;
+
 		count++;
 	    	
 	};
@@ -85,10 +88,10 @@ void main() {
 			printf("stu %i\n", nodesArray[i].children[0]);
 		}
 		else {
-		int k;
+			int k;
 			for (k=0; k<MAX_CHILDREN; k++) {
 				if (nodesArray[i].children[k] != 0 ) {
-					printf("stu %i\n", nodesArray[i].children[k]);
+					printf("%i\n", nodesArray[i].children[k]);
 				}
 			}
 		}
@@ -97,6 +100,16 @@ void main() {
 	}
 	
 	fclose ( infile );
+	
+
+	for(int i=0; i<sizeof(nodesArray)/sizeof(nodesArray[0]); i++){
+		if(i==0){
+			nodesArray[i]->status = READY;
+		}
+		else{
+			nodesArray[i]->status = INELIGIBLE;
+		}
+	}
 	
 	/*
 	// starting processes
