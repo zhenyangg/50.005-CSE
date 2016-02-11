@@ -7,6 +7,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
+#include <unistd.h>
+#include <sys/wait.h>
 
 
 #define MAX_LENGTH	128
@@ -57,6 +59,7 @@ void main() {
 				token += len;
 				j++;
 			}
+			nodesArray[count-1].num_children = j;
 		}
 	    	token = strtok(NULL, ":");
 		strcpy(nodesArray[count-1].input, token); // store inputFile string
@@ -96,23 +99,44 @@ void main() {
 	
 	fclose ( infile );
 	
-	/*
+	
 	// starting processes
-	pid = fork();
-	
-	if (pid >= 0){ //forking successful
-	
-	    if (pid == 0) { // child process
-	        printf("Child process\n");
-	    }
-	    
-	    else { // parent process
-	        printf("Parent process\n");
-	    }
-	    
+	int pid;
+
+	for(int i=0; i<count-1; i++){
+		// fork() for node 0
+		if(i==0){
+			if(nodesArray[i].status == READY){
+				pid = fork();
+				if (pid >= 0){ //forking successful
+				    if (pid == 0) { // child process
+				        printf("Child process\n");
+				        nodesArray[i].status = RUNNING;
+				        printf("Child process status: %d\n", nodesArray[i].status);
+				        nodesArray[i].pid = pid;
+				        printf("childPID: %d\n", pid);
+				        
+				        /*TODO: execute program for this node*/
+				        
+				        nodesArray[i].status = FINISHED;
+				        printf("Child process status: %d\n", nodesArray[i].status);
+				    }
+				    else { // parent process
+				        printf("Parent process\n");
+				        waitpid(-1, NULL, 0);
+				        printf("Back to parent process\n");
+				    }
+				}
+				else { printf("Forking failed~\n");}
+			}
+		}
+
+		/*TODO: fork() for the rest of the nodes that are not node 0 */
 	}
-	else { printf("Forking failed~\n");
-    */
+	
+	
+	
+    
 	
 	
 };
