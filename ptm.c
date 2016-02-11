@@ -75,6 +75,17 @@ void main() {
 	    
 	    	nodesArray[count-1].id = count;
 
+    	
+
+		if((count-1) == 0){
+			nodesArray[count-1].status = READY;
+		}
+		else{
+			nodesArray[count-1].status = INELIGIBLE;
+		}
+		//printf("status: %d\n", nodesArray[count-1].status);
+    	
+
 		count++;
 	    	
 	};
@@ -102,14 +113,6 @@ void main() {
 	fclose ( infile );
 	
 
-	for(int i=0; i<sizeof(nodesArray)/sizeof(nodesArray[0]); i++){
-		if(i==0){
-			nodesArray[i]->status = READY;
-		}
-		else{
-			nodesArray[i]->status = INELIGIBLE;
-		}
-	}
 	
 	/*
 	// starting processes
