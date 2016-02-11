@@ -25,67 +25,57 @@ struct Node {
 
 
 // main: open textproc.txt
-// separate and store each of the commands somewhere
-// use : as delimiter to split the commands
+// separate and store individual commands in struct array
+// use : as delimiter to split the commands (use strtok)
 void main() {
 	FILE *infile;
 	infile = fopen("testproc.txt", "r");
 
 	char str[30];
-	int count = 1;
+	int count = 1, i, j;
 	
 	char *ptr;
-   	char line [ 128 ]; /* or other suitable maximum line size */
+   	char line [ 128 ]; // or other suitable maximum line siz
 	struct Node nodesArray[10];
 	char *token;
-	while ( fgets ( line, sizeof line, infile ) != NULL ) /* read a line */
+	while ( fgets ( line, sizeof line, infile ) != NULL ) // read a line
 	{
-		// parse childIDs to get int array and no. of children
+	    	// fputs ( line, stdout ); // Print out commands
 
-		// ptr[count-1] = (struct Node *) malloc(sizeof(struct Node));
-	    	fputs ( line, stdout ); /* write the line */
 	    	token = strtok(line, ":");
 		strcpy(nodesArray[count-1].prog, token);
-		//printf("%s\n", nodesArray[count-1].prog);
 	    	
 	    	token = strtok(NULL, ":");
 		if (strcmp(token, "none") == 0){
-			nodesArray[count-1].children[0] = -1;
-			//printf("BLAHZ %d\n", nodesArray[count-1].children[0]);
+			nodesArray[count-1].children[0] = -1; // childless
 		}
 		else {
-			int j=0, len, num;
+			j=0; int len, num;
+			// if more than one child, continue storing
 			while (sscanf(token, "%d%n", &num, &len) == 1) {
 				nodesArray[count-1].children[j] = num;
 				token += len;
-				//printf("j = %d, num = %d\n", j, num);
 				j++;
 			}
-			//printf("BLAHZ %d\n", nodesArray[count-1].children[0]);
 		}
-		
-	    	
 	    	token = strtok(NULL, ":");
-		strcpy(nodesArray[count-1].input, token);
-		//printf("%s\n", nodesArray[count-1].input);
-	    	
+		strcpy(nodesArray[count-1].input, token); // store inputFile string
 	    	token = strtok(NULL, "\n");
-	    	strcpy(nodesArray[count-1].output, token);
-		//printf("%s\n", nodesArray[count-1].output);
+	    	strcpy(nodesArray[count-1].output, token); // store outputFile string
 	    
-	    	nodesArray[count-1].id = count;
-
+	    	nodesArray[count-1].id = count; // Node Number = Node ID
 		count++;
 	    	
 	};
-
+	
+	// Verify no. of commands
 	printf("No. of commands: %d\n", count-1);
 	
-	int i;
+	// Print content in each node (for verificaton purposes)
 	for (i=0; i<count-1; i++) {
 		printf("%s\n", nodesArray[i].prog);
 		if (nodesArray[i].children[0] == -1 ) {
-			printf("stu %i\n", nodesArray[i].children[0]);
+			printf("%i\n", nodesArray[i].children[0]);
 		}
 		else {
 			int k;
@@ -101,13 +91,13 @@ void main() {
 	
 	fclose ( infile );
 	
-
-	for(int i=0; i<sizeof(nodesArray)/sizeof(nodesArray[0]); i++){
+	// Initialise first node to READY, and the rest to INELIGIBLE
+	for(i=0; i<sizeof(nodesArray)/sizeof(nodesArray[0]); i++){
 		if(i==0){
-			nodesArray[i]->status = READY;
+			nodesArray[i].status = READY;
 		}
 		else{
-			nodesArray[i]->status = INELIGIBLE;
+			nodesArray[i].status = INELIGIBLE;
 		}
 	}
 	
