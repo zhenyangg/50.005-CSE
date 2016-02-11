@@ -20,7 +20,7 @@ struct Node {
     int num_children; // how many children this node has
     int status; // ineligible/ready/running/finished
     pid_t pid; // Process
-} *ptr[10]; // max 10 processes
+}; // max 10 processes
 
 
 // main: open textproc.txt
@@ -33,37 +33,37 @@ void main() {
 	char str[30];
 	int count = 1;
 	
+	char *ptr;
    	char line [ 128 ]; /* or other suitable maximum line size */
+	struct Node nodesArray[10];
 	char *token;
 	while ( fgets ( line, sizeof line, infile ) != NULL ) /* read a line */
 	{
 		// parse childIDs to get int array and no. of children
-		ptr[count-1] = (struct Node *) malloc(sizeof(struct Node));
+		// ptr[count-1] = (struct Node *) malloc(sizeof(struct Node));
 	    	fputs ( line, stdout ); /* write the line */
 	    	token = strtok(line, ":");
-		ptr[count-1]->prog = token;
+		strcpy(nodesArray[count-1].prog, token);
 	    	
 	    	token = strtok(NULL, ":");
-		ptr[count-1]->children = token;
+		nodesArray[count-1].children = (int) strtol(token, &ptr, 10);
 	    	
-	    	inputFile = strtok(NULL, ":");
-		ptr[count-1]->input = token;
+	    	token = strtok(NULL, ":");
+		strcpy(nodesArray[count-1].input, token);
 	    	
-	    	outputFile = strtok(NULL, "\n");
-	    	ptr[count-1]->output = token;
+	    	token = strtok(NULL, "\n");
+	    	strcpy(nodesArray[count-1].output, token);
 	    
-	    	
-	    	
-	    	
-	    	ptr[count-1]->id = count;
+	    	nodesArray[count-1].id = count;
 	    	
 	};
 	
-	for (int i=0; i<count; i++) {
-	    printf("%s\n", ptr[i]->progName);
-	    printf("%s\n", ptr[i]->childIDs);
-	    printf("%s\n", ptr[i]->inputFile);
-	    printf("%s\n", ptr[i]->outputFile);
+	int i;
+	for (i=0; i<count; i++) {
+	    printf("%s\n", nodesArray[i].prog);
+	    printf("%i\n", *nodesArray[i].children);
+	    printf("%s\n", nodesArray[i].input);
+	    printf("%s\n", nodesArray[i].output);
 	}
 	
 	fclose ( infile );
