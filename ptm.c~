@@ -81,15 +81,10 @@ void main() {
 	int i;
 	for (i=0; i<count-1; i++) {
 		printf("%s\n", nodesArray[i].prog);
-		if (nodesArray[i].children[0] == -1 ) {
-			printf("stu %i\n", nodesArray[i].children[0]);
-		}
-		else {
 		int k;
-			for (k=0; k<MAX_CHILDREN; k++) {
-				if (nodesArray[i].children[k] != 0 ) {
-					printf("stu %i\n", nodesArray[i].children[k]);
-				}
+		for (k=0; k<MAX_CHILDREN; k++) {
+			if (nodesArray[i].children[k] != 0 ) {
+				printf("stu %i\n", nodesArray[i].children[k]);
 			}
 		}
 		printf("%s\n", nodesArray[i].input);
