@@ -63,7 +63,12 @@ void main() {
 	    	token = strtok(NULL, "\n");
 	    	strcpy(nodesArray[count-1].output, token); // store outputFile string
 	    
-	    	nodesArray[count-1].id = count; // Node Number = Node ID
+	    	nodesArray[count-1].id = count; // Node Number = Node ID    	
+
+		// Initialise first node to READY, and the rest to INELIGIBLE
+		if((count-1) == 0){ nodesArray[count-1].status = READY;}
+		else {nodesArray[count-1].status = INELIGIBLE; }
+
 		count++;
 	    	
 	};
@@ -90,16 +95,6 @@ void main() {
 	}
 	
 	fclose ( infile );
-	
-	// Initialise first node to READY, and the rest to INELIGIBLE
-	for(i=0; i<sizeof(nodesArray)/sizeof(nodesArray[0]); i++){
-		if(i==0){
-			nodesArray[i].status = READY;
-		}
-		else{
-			nodesArray[i].status = INELIGIBLE;
-		}
-	}
 	
 	/*
 	// starting processes
