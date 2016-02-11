@@ -39,23 +39,24 @@ void main() {
 	{
 		// parse childIDs to get int array and no. of children
 		ptr[count-1] = (struct Node *) malloc(sizeof(struct Node));
-	    	fputs ( line, stdout ); /* write the line */
-	    	token = strtok(line, ":");
+	    	
+	    fputs ( line, stdout ); /* write the line */
+	    token = strtok(line, ":");
 		ptr[count-1]->prog = token;
 	    	
-	    	token = strtok(NULL, ":");
+	    token = strtok(NULL, ":");
 		ptr[count-1]->children = token;
 	    	
-	    	inputFile = strtok(NULL, ":");
+	    token = strtok(NULL, ":");
 		ptr[count-1]->input = token;
 	    	
-	    	outputFile = strtok(NULL, "\n");
-	    	ptr[count-1]->output = token;
+    	token = strtok(NULL, "\n");
+    	ptr[count-1]->output = token;
 	    
 	    	
 	    	
 	    	
-	    	ptr[count-1]->id = count;
+	    ptr[count-1]->id = count;
 	    	
 	};
 	
