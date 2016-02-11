@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
 
 
 #define MAX_LENGTH	128
@@ -40,27 +41,7 @@ void main() {
 	while ( fgets ( line, sizeof line, infile ) != NULL ) /* read a line */
 	{
 		// parse childIDs to get int array and no. of children
-<<<<<<< HEAD
-		ptr[count-1] = (struct Node *) malloc(sizeof(struct Node));
-	    	
-	    fputs ( line, stdout ); /* write the line */
-	    token = strtok(line, ":");
-		ptr[count-1]->prog = token;
-	    	
-	    token = strtok(NULL, ":");
-		ptr[count-1]->children = token;
-	    	
-	    token = strtok(NULL, ":");
-		ptr[count-1]->input = token;
-	    	
-    	token = strtok(NULL, "\n");
-    	ptr[count-1]->output = token;
-	    
-	    	
-	    	
-	    	
-	    ptr[count-1]->id = count;
-=======
+
 		// ptr[count-1] = (struct Node *) malloc(sizeof(struct Node));
 	    	fputs ( line, stdout ); /* write the line */
 	    	token = strtok(line, ":");
@@ -76,7 +57,7 @@ void main() {
 	    	strcpy(nodesArray[count-1].output, token);
 	    
 	    	nodesArray[count-1].id = count;
->>>>>>> 0d92102ba0169bf9b0e24e8f79fa0b5232307882
+
 	    	
 	};
 	
@@ -89,6 +70,16 @@ void main() {
 	}
 	
 	fclose ( infile );
+	
+
+	for(int i=0; i<sizeof(nodesArray)/sizeof(nodesArray[0]); i++){
+		if(i==0){
+			nodesArray[i]->status = READY;
+		}
+		else{
+			nodesArray[i]->status = INELIGIBLE;
+		}
+	}
 	
 	/*
 	// starting processes
