@@ -9,6 +9,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <fcntl.h>
 
 
 #define MAX_LENGTH	128
@@ -34,7 +35,7 @@ void main() {
 	infile = fopen("testproc.txt", "r");
 
 	char str[30];
-	int count = 1, i, j;
+	int count = 1, i, j, k;
 	
 	char *ptr;
    	char line [ 128 ]; // or other suitable maximum line siz
@@ -105,17 +106,20 @@ void main() {
 	// starting processes
 
 	
-	
+	pid_t pid;
 	int numLeftToProcess = count;
-	i = 0;
+	int nextNode = 1;
 	while (numLeftToProcess > 0) {
 
 		// get PID for parent node
-		nodesArray[0].pid = getpid();
+		nodesArray[nextNode-1].pid = getpid();
 
-		for (j=0; j<nodesArray[i].num_children; j++) { // loop through all children nodes and run them
+		for (j=0; j<nodesArray[nextNode-1].num_children; j++) { // loop through all children nodes and run them
+
+			nextNode++;
 
 			nodesArray[i].children[j] = fork(); // save child PID in parent
+			pid = nodesArray[i].children[j];
 			
 			if (pid >= 0){
 
@@ -133,15 +137,18 @@ void main() {
 						status = dup2(1, 0); // (1) stdin to stdout
 					}
 					else { // use output file
-						status = dup2(nodesArray[i].output, 0); // (2) stdin to output file
+						int fd_out = open(nodesArray[i].output, O_WRONLY ); // writing only
+						status = dup2(fd_out, 0); // (2) stdin to output file
 					}
 				}
 				else { // use input file
+					int fd_in = open(nodesArray[i].input, O_RDONLY ); // reading only
 					if (strcmp(nodesArray[i].output, "stdout") == 0) {
-						status = dup2(1, nodesArray[i].input); // (3) input file to stdout
+						status = dup2(1, fd_in); // (3) input file to stdout
 					}
 					else { // use output file
-						status = dup2(nodesArray[i].output, nodesArray[i].input); // (4) input file to output file
+						int fd_out = open(nodesArray[i].output, O_WRONLY ); // writing only
+						status = dup2(fd_out, fd_in); // (4) input file to output file
 					}
 				}
 
@@ -150,12 +157,19 @@ void main() {
 				}
 			
 				nodesArray[i].status = 3; // STATUS: FINISHED
-				printf("Child process status: %d\n", nodesArray[i].status);
+				printf("Child process status: %d\nExiting child process", nodesArray[i].status);
+				_exit(0);
 			    }
 
 			    else { // parent process
 				printf("Parent process\n");
-				printf("Back to parent process\n");
+				// verify node statuses
+				for(k=0; k<count-1; k++){
+					printf("Node %d status: %d || ", nodesArray[k].id, nodesArray[k].status);
+				}
+				printf("\n");
+				// wait for all children to finish processing
+				waitpid(pid, NULL, 0);
 			    }
 
 			}
@@ -163,19 +177,11 @@ void main() {
 			else { printf("Forking failed~\n"); }
 
 		}
-		i = i + nodesArray[i].num_children;
-		wait(); // wait for all children to finish processing
-	}
+	};
 
-	
-	// fork() for ready nodes
-	if(nodesArray[i].status == 1){ // READY
 		
-	}
-	// verify node statuses
-	for(j=0; j<count-1; j++){
-		printf("Node %d status: %d", nodesArray[j].id, nodesArray[j].status);
-	}
+		
+	
 
 	/*
 	for(i=0; i<count-1; i++){
@@ -205,10 +211,9 @@ void main() {
 				else { printf("Forking failed~\n");}
 			}
 		}
-		*/
+		
 
-		/*TODO: fork() for the rest of the nodes that are not node 0 */
-	}
+	}*/
 	
 	
 	
