@@ -156,14 +156,11 @@ void main() {
 			if (toExecuteNow[k] == 1) { // STATUS: READY
 
 				pid = fork(); // fork
-				nodesArray[k].pid = pid;
-
+				
 				if (pid >= 0){
 
 				    if (pid == 0) {
 					
-					//nodesArray[k].status = 2; // STATUS: RUNNING
-					nodesArray[k].pid = getpid();
 					printf("'***'Executing Node %d now...\n", nodesArray[k].id);
 					printf("Child status: RUNNING // Node %d (%d) \n", nodesArray[k].id, getpid());
 					
@@ -196,7 +193,6 @@ void main() {
 				    }
 
 				    else { // parent process
-					printf("Waiting for child to finish...\n");
 			
 					// wait for all children to finish processing
 					waitpid(pid, NULL, 0);
@@ -205,6 +201,8 @@ void main() {
 					// post-processing
 					numLeftToProcess--;
 					nodesArray[k].status = 3; // STATUS: FINISHED
+					nodesArray[k].pid=pid;
+					
 					
 					// set children of current Node to 'READY'
 					for (i=1; i<=nodesArray[k].num_children; i++) {
@@ -221,21 +219,9 @@ void main() {
 			}
 		
 		}
-		//numLeftToProcess--;
-		
-		//printf("currNode: %d\n", currNode);
 
-		// get PID for parent node
-		nodesArray[currNode].pid = getpid();
-		//printf("parentPID: %d\n", nodesArray[currNode].pid);
-
-		
-		//currNode += nodesArray[currNode].num_children;
 	};
 
-		
-		
-	
 
 	/*
 	for(i=0; i<count-1; i++){
@@ -275,10 +261,3 @@ void main() {
 	
 	
 };
-
-
-
-// create a process // parallel processing
-// follow the requirements
-
-// output to sink.txt
