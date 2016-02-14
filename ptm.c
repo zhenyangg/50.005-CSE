@@ -101,6 +101,9 @@ void main() {
 	fclose ( infile );
 	
 
+	for(j=0; j<count-1; j++){
+		nodesArray[j].pid = -1;
+	}
 
 	
 	// starting processes
@@ -109,11 +112,11 @@ void main() {
 	int currNode = 0;
 	while (numLeftToProcess > 0) {
 		
+		printf("\n\n\nProcesses left: %d\n", numLeftToProcess);
+
 		// show current node statuses
 		for(j=0; j<count-1; j++){
-			printf("\n\n\nProcesses left: %d\n", numLeftToProcess);
-			printf("Node %d status: %d || ", nodesArray[j].id, nodesArray[j].status);
-			printf("pids: %d || ", nodesArray[j].pid);
+			printf("\nNode %d status: %d || pid: %d", nodesArray[j].id, nodesArray[j].status, nodesArray[j].pid);
 		}
 
 
@@ -125,16 +128,16 @@ void main() {
 
 				printf("parentPID: %d\n", getpid());
 				pid = fork(); // fork
-		
+				nodesArray[k].pid = pid;
+
 				if (pid >= 0){
 
 				    if (pid == 0) {
-					numLeftToProcess--;
 					
-					nodesArray[k].status = 2; // STATUS: RUNNING
+					//nodesArray[k].status = 2; // STATUS: RUNNING
 					nodesArray[k].pid = getpid();
-					printf("childPID %d has started running. Status: %d \n", nodesArray[k].pid, nodesArray[k].status);
-					/*
+					printf("childPID %d has started running. Status: RUNNING \n", getpid());
+					
 					// Redirection
 					int status;
 					if (strcmp(nodesArray[k].input, "stdin") == 0) {
@@ -159,10 +162,9 @@ void main() {
 					if (status == -1) {
 						perror("dup2(): ");
 					}
-					*/
+					
 
-					nodesArray[k].status = 3; // STATUS: FINISHED
-					printf("childPID %d has finished running. Status: %d \n", nodesArray[k].pid, nodesArray[k].status);
+					printf("childPID %d has finished running. Status: FINISHED \n", getpid());
 					printf("Exiting process now.\n");
 					_exit(0);
 				    }
@@ -172,6 +174,10 @@ void main() {
 			
 					// wait for all children to finish processing
 					waitpid(pid, NULL, 0);
+
+					// post-processing
+					numLeftToProcess--;
+					nodesArray[k].status = 3; // STATUS: FINISHED
 					
 					// set children of current Node to 'READY'
 					for (i=1; i<=nodesArray[k].num_children; i++) {
