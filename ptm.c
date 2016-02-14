@@ -137,22 +137,22 @@ void main() {
 					/*
 					// Redirection
 					int status;
-					if (strcmp(nodesArray[i].input, "stdin") == 0) {
-						if (strcmp(nodesArray[i].output, "stdout") == 0) {
+					if (strcmp(nodesArray[k].input, "stdin") == 0) {
+						if (strcmp(nodesArray[k].output, "stdout") == 0) {
 							status = dup2(1, 0); // (1) stdin to stdout
 						}
 						else { // use output file
-							int fd_out = open(nodesArray[i].output, O_WRONLY ); // writing only
+							int fd_out = open(nodesArray[k].output, O_WRONLY ); // writing only
 							status = dup2(fd_out, 0); // (2) stdin to output file
 						}
 					}
 					else { // use input file
-						int fd_in = open(nodesArray[i].input, O_RDONLY ); // reading only
-						if (strcmp(nodesArray[i].output, "stdout") == 0) {
+						int fd_in = open(nodesArray[k].input, O_RDONLY ); // reading only
+						if (strcmp(nodesArray[k].output, "stdout") == 0) {
 							status = dup2(1, fd_in); // (3) input file to stdout
 						}
 						else { // use output file
-							int fd_out = open(nodesArray[i].output, O_WRONLY ); // writing only
+							int fd_out = open(nodesArray[k].output, O_WRONLY ); // writing only
 							status = dup2(fd_out, fd_in); // (4) input file to output file
 						}
 					}
