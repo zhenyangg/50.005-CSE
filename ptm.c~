@@ -68,7 +68,7 @@ void main() {
 	    	token = strtok(NULL, "\n");
 	    	strcpy(nodesArray[count-1].output, token); // store outputFile string
 	    
-	    	nodesArray[count-1].id = count; // Node Number = Node ID    	
+	    	nodesArray[count-1].id = count-1; // Node Number = Node ID    	
 
 		if((count-1) == 0){ nodesArray[count-1].status = 1;} // READY (1st node)
 		else {nodesArray[count-1].status = 0; } // INELIGIBLE (other nodes)
@@ -110,23 +110,27 @@ void main() {
 	pid_t pid;
 	int numLeftToProcess = count -1;
 	int currNode = 0;
+	int toExecuteNow [MAX_CHILDREN];
 	while (numLeftToProcess > 0) {
-		
-		printf("\n\n\nProcesses left: %d\n", numLeftToProcess);
 
 		// show current node statuses
+		printf("\nparentPID: %d\n", getpid());
 		for(j=0; j<count-1; j++){
 			printf("\nNode %d status: %d || pid: %d", nodesArray[j].id, nodesArray[j].status, nodesArray[j].pid);
 		}
+		printf("\n");
 
+		// Select nodes to run
+		for(k=0; k<count-1; k++){
+			if (nodesArray[k].status == 1) { toExecuteNow[k] = 1;} // STATUS: READY (1)
+			else { toExecuteNow[k] = 0; } // STATUS: INELIGIBLE (1) / FINISHED (4)
+		}
 
 		// run 'READY' nodes
-		printf("Selecting nodes to run...\n");
 		for(k=0; k<count-1; k++){
+			
+			if (toExecuteNow[k] == 1) { // STATUS: READY
 
-			if (nodesArray[k].status == 1) { // STATUS: READY
-
-				printf("parentPID: %d\n", getpid());
 				pid = fork(); // fork
 				nodesArray[k].pid = pid;
 
@@ -136,8 +140,9 @@ void main() {
 					
 					//nodesArray[k].status = 2; // STATUS: RUNNING
 					nodesArray[k].pid = getpid();
-					printf("childPID %d has started running. Status: RUNNING \n", getpid());
-					/*
+					printf("'***'Executing Node %d now...\n", nodesArray[k].id);
+					printf("Child status: RUNNING // Node %d (%d) \n", nodesArray[k].id, getpid());
+					
 					// Redirection
 					int status;
 					if (strcmp(nodesArray[k].input, "stdin") == 0) {
@@ -162,18 +167,16 @@ void main() {
 					if (status == -1) {
 						perror("dup2(): ");
 					}
-					*/
-
-					printf("childPID %d has finished running. Status: FINISHED \n", getpid());
-					printf("Exiting process now.\n");
+					
 					_exit(0);
 				    }
 
 				    else { // parent process
-					printf("Parent process. Waiting for child to finish\n");
+					printf("Waiting for child to finish...\n");
 			
 					// wait for all children to finish processing
 					waitpid(pid, NULL, 0);
+					printf("Child status: FINISHED // Node %d (%d) \n", nodesArray[k].id, pid);
 
 					// post-processing
 					numLeftToProcess--;
