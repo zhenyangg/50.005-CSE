@@ -172,7 +172,7 @@ void main() {
 							//status = dup2(fd_out, fd_in); // (4) input file to output file
 							//close(fd_out);
 
-							char *temp = malloc(strlen(nodesArray[k].prog)+strlen(" >  ")+strlen(nodesArray[k].input)+strlen(nodesArray[k].output)+1);//+1 for the zero-terminator
+							char *temp = malloc(strlen(nodesArray[k].prog)+strlen(" > ")+strlen(nodesArray[k].input)+strlen(nodesArray[k].output)+1);//+1 for the zero-terminator
 							strcpy(temp, nodesArray[k].prog);
 							strcat(temp, " ");
 							strcat(temp, nodesArray[k].input);
