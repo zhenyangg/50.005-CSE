@@ -18,18 +18,15 @@
 struct Node {
     int id; // corresponds to line number in graph text file
     char prog[MAX_LENGTH]; // prog + arguments
-    char input[MAX_LENGTH]; // filename
-    char output[MAX_LENGTH]; // filename
+    char input[MAX_LENGTH]; // input filename
+    char output[MAX_LENGTH]; // output filename
     int children[MAX_CHILDREN]; // children ids
     int num_children; // how many children this node has
     int status; // ineligible/ready/running/finished
-    pid_t pid; // Process
-}; // max 10 processes
+    pid_t pid; // process ID
+};
 
 
-// main: open textproc.txt
-// separate and store individual commands in struct array
-// use : as delimiter to split the commands (use strtok)
 void main() {
 	FILE *infile;
 	infile = fopen("testproc.txt", "r");
@@ -41,21 +38,28 @@ void main() {
    	char line [ 128 ]; // or other suitable maximum line siz
 	struct Node nodesArray[10];
 	char *token;
-	while ( fgets ( line, sizeof line, infile ) != NULL ) // read a line
-	{
-	    	// fputs ( line, stdout ); // Print out commands
 
-	    	token = strtok(line, ":");
+	/*******************************
+	*  --------------------------  *
+	*  Read File, Store Variables  *
+	*  --------------------------  *
+	/******************************/
+
+	while ( fgets ( line, sizeof line, infile ) != NULL )
+	{
+	    token = strtok(line, ":");
 		strcpy(nodesArray[count-1].prog, token);
-	    	
-	    	token = strtok(NULL, ":");
+	    token = strtok(NULL, ":");
+
+	    // node has no child
 		if (strcmp(token, "none") == 0){
-			nodesArray[count-1].children[0] = -1; // childless
+			nodesArray[count-1].children[0] = -1;
 			nodesArray[count-1].num_children = 0;
 		}
+
+		// node has children, continue storing
 		else {
 			j=0; int len, num;
-			// if more than one child, continue storing
 			while (sscanf(token, "%d%n", &num, &len) == 1) {
 				nodesArray[count-1].children[j] = num;
 				token += len;
@@ -63,49 +67,40 @@ void main() {
 			}
 			nodesArray[count-1].num_children = j;
 		}
-	    	token = strtok(NULL, ":");
-		strcpy(nodesArray[count-1].input, token); // store inputFile string
-	    	token = strtok(NULL, "\n");
-	    	strcpy(nodesArray[count-1].output, token); // store outputFile string
-	    
-	    	nodesArray[count-1].id = count-1; // Node Number = Node ID    	
 
-		if((count-1) == 0){ nodesArray[count-1].status = 1;} // READY (1st node)
-		else {nodesArray[count-1].status = 0; } // INELIGIBLE (other nodes)
+		// store input and output filenames
+	    token = strtok(NULL, ":");
+		strcpy(nodesArray[count-1].input, token);
+	    token = strtok(NULL, "\n");
+	    strcpy(nodesArray[count-1].output, token);
+	    
+	    // store node ID
+	    nodesArray[count-1].id = count-1;
+
+	    // Let 1st node be 'READY'
+		if((count-1) == 0){ nodesArray[count-1].status = READY;}
+		// and the other nodes be 'INELIGIBLE'
+		else {nodesArray[count-1].status = INELIGIBLE; }
 
 		count++;
 	    	
 	};
 	
-	// Verify no. of commands
+	// Verify no. of cmds stored == no. cmds in file
 	printf("No. of commands: %d\n", count-1);
-	
-	// Print content in each node (for verificaton purposes)
-	/* for (i=0; i<count-1; i++) {
-		printf("%s\n", nodesArray[i].prog);
-		if (nodesArray[i].children[0] == -1 ) {
-			printf("%i\n", nodesArray[i].children[0]);
-		}
-		else {
-			int k;
-			for (k=0; k<MAX_CHILDREN; k++) {
-				if (nodesArray[i].children[k] != 0 ) {
-					printf("%i\n", nodesArray[i].children[k]);
-				}
-			}
-		}
-		printf("%s\n", nodesArray[i].input);
-		printf("%s\n\n", nodesArray[i].output);
-	}*/
 	
 	fclose ( infile );
 
+	// initialize pid of each node to -1
 	for(j=0; j<count-1; j++){
 		nodesArray[j].pid = -1;
 	}
-
 	
-	// starting processes
+	/******************
+	*  -------------  *
+	*  Run Processes  *
+	*  -------------  *
+	/*****************/
 
 	pid_t pid;
 	int numLeftToProcess = count -1;
@@ -113,7 +108,7 @@ void main() {
 	int toExecuteNow [MAX_CHILDREN]; // to determine which node can run in the current round
 	while (numLeftToProcess > 0) {
 
-		// show current node statuses
+		// Display node statuses
 		printf("\nparentPID: %d\n", getpid());
 		for(j=0; j<count-1; j++){
 			printf("\nNode %d status: %d || pid: %d", nodesArray[j].id, nodesArray[j].status, nodesArray[j].pid);
@@ -122,93 +117,103 @@ void main() {
 
 		// Select nodes to run
 		for(k=0; k<count-1; k++){
-			if (nodesArray[k].status == 1) { toExecuteNow[k] = 1;} // STATUS: READY (1)
-			else { toExecuteNow[k] = 0; } // STATUS: INELIGIBLE (1) / FINISHED (4)
+			if (nodesArray[k].status == READY) { toExecuteNow[k] = READY;} // STATUS: READY (1)
+			else { toExecuteNow[k] = INELIGIBLE; } // STATUS: INELIGIBLE (1) or FINISHED (4)
 		}
 
-		// run 'READY' nodes
+		// Loop through all nodes
+		// Run all 'READY' nodes
 		for(k=0; k<count-1; k++){
 			
-			if (toExecuteNow[k] == 1) { // STATUS: READY
+			if (toExecuteNow[k] == READY) {
 
-				pid = fork(); // fork
+				pid = fork();
 				
 				if (pid >= 0){
 
+					// Child process created
+					// Run tagged commands
 				    if (pid == 0) {
 					
-					printf("'***'Executing Node %d now...\n", nodesArray[k].id);
-					printf("Child status: RUNNING // Node %d (%d) \n", nodesArray[k].id, getpid());
+						printf("'***'Executing Node %d now...\n", nodesArray[k].id);
+						printf("Child status: RUNNING // Node %d (%d) \n", nodesArray[k].id, getpid());
 
-					printf("\n%s\n", nodesArray[k].prog);
+						printf("\n%s\n", nodesArray[k].prog);
 
-					// Redirection
-					int status;
-					if (strcmp(nodesArray[k].input, "stdin") == 0) {
-						if (strcmp(nodesArray[k].output, "stdout") != 0) {
-							// use output file
-							int fd_out = open(nodesArray[k].output, O_WRONLY ); // write-only
-							status = dup2(fd_out, 1); // (2) stdin to output file
-							close(fd_out);
-							system(nodesArray[k].prog);
-							//execl("/bin/cat", "cat", "cat-1.txt", "cat-2.txt", NULL);
+						/****************
+						*  -----------  *
+						*  Redirection  *
+						*  -----------  *
+						/***************/
+
+						int status;
+
+							if (strcmp(nodesArray[k].input, "stdin") == 0) {
+
+								// (1) stdin to output file
+								if (strcmp(nodesArray[k].output, "stdout") != 0) {
+									int fd_out = open(nodesArray[k].output, O_WRONLY );
+									status = dup2(fd_out, 1);
+									close(fd_out);
+									system(nodesArray[k].prog);
+								}
+							}
+							else {
+								int fd_in = open(nodesArray[k].input, O_RDONLY );
+
+								// (2) input file to stdout
+								if (strcmp(nodesArray[k].output, "stdout") == 0) {
+									status = dup2(STDOUT_FILENO, fd_in);
+									close(fd_in);
+
+									char *temp = malloc(strlen(nodesArray[k].prog)+strlen(" ")+strlen(nodesArray[k].input)+1);//+1 for the zero-terminator
+									strcpy(temp, nodesArray[k].prog);
+									strcat(temp, " ");
+									strcat(temp, nodesArray[k].input);
+
+									system(temp);
+								}
+
+								// (3) input file to output file
+								else {
+
+									char *temp = malloc(strlen(nodesArray[k].prog)+strlen(" >  ")+strlen(nodesArray[k].input)+strlen(nodesArray[k].output)+1);//+1 for the zero-terminator
+									strcpy(temp, nodesArray[k].prog);
+									strcat(temp, " ");
+									strcat(temp, nodesArray[k].input);
+									strcat(temp, " > ");
+									strcat(temp, nodesArray[k].output);
+
+									system(temp);
+								}
+
 						}
-					}
-					else { // use input file
-						int fd_in = open(nodesArray[k].input, O_RDONLY ); // read-only
-						if (strcmp(nodesArray[k].output, "stdout") == 0) {
-							status = dup2(STDOUT_FILENO, fd_in); // (3) input file to stdout
-							close(fd_in);
 
-							char *temp = malloc(strlen(nodesArray[k].prog)+strlen(" ")+strlen(nodesArray[k].input)+1);//+1 for the zero-terminator
-							strcpy(temp, nodesArray[k].prog);
-							strcat(temp, " ");
-							strcat(temp, nodesArray[k].input);
-
-							system(temp);
-						}
-						else { // use output file
-							//int fd_out = open(nodesArray[k].output, O_WRONLY ); // writing only
-							//status = dup2(fd_out, fd_in); // (4) input file to output file
-							//close(fd_out);
-
-							char *temp = malloc(strlen(nodesArray[k].prog)+strlen(" >  ")+strlen(nodesArray[k].input)+strlen(nodesArray[k].output)+1);//+1 for the zero-terminator
-							strcpy(temp, nodesArray[k].prog);
-							strcat(temp, " ");
-							strcat(temp, nodesArray[k].input);
-							strcat(temp, " > ");
-							strcat(temp, nodesArray[k].output);
-							
-
-							system(temp);
+						// if redirection fails
+						if (status == -1) {
+							perror("dup2(): ");
 						}
 						
-					}
-
-					if (status == -1) {
-						perror("dup2(): ");
-					}
-					
-
-					_exit(0);
+						_exit(0);
 				    }
 
-				    else { // parent process
+				    // Parent process
+				    else {
 			
-					// wait for all children to finish processing
-					waitpid(pid, NULL, 0);
-					printf("Child status: FINISHED // Node %d (%d) \n", nodesArray[k].id, pid);
+						// wait for all children to finish processing
+						waitpid(pid, NULL, 0);
+						printf("Child status: FINISHED // Node %d (%d) \n", nodesArray[k].id, pid);
 
-					// post-processing
-					numLeftToProcess--;
-					nodesArray[k].status = 3; // STATUS: FINISHED
-					nodesArray[k].pid=pid;
-					
-					
-					// set children of current Node to 'READY'
-					for (i=1; i<=nodesArray[k].num_children; i++) {
-						nodesArray[k+i].status = 1;
-					}
+						// post-processing
+						numLeftToProcess--;
+						nodesArray[k].status = FINISHED; // new STATUS: FINISHED
+						nodesArray[k].pid=pid;
+
+
+						// set children of current Node to 'READY'
+						for (i=1; i<=nodesArray[k].num_children; i++) {
+							nodesArray[k+i].status = READY;
+						}
 
 				    }
 				
@@ -222,43 +227,5 @@ void main() {
 		}
 
 	};
-
-
-	/*
-	for(i=0; i<count-1; i++){
-		
-		// fork() for node 0
-		if(i==0){
-			if(nodesArray[i].status == READY){
-				pid = fork();
-				if (pid >= 0){ //forking successful
-				    if (pid == 0) { // child process
-				        nodesArray[i].status = RUNNING;
-				        printf("Child process status: %d\n", nodesArray[i].status);
-				        nodesArray[i].pid = pid;
-				        printf("childPID: %d\n", pid);
-				        
-				        //TODO: execute program for this node
-				        
-				        nodesArray[i].status = FINISHED;
-				        printf("Child process status: %d\n", nodesArray[i].status);
-				    }
-				    else { // parent process
-				        printf("Parent process\n");
-				        waitpid(-1, NULL, 0);
-				        printf("Back to parent process\n");
-				    }
-				}
-				else { printf("Forking failed~\n");}
-			}
-		}
-		
-
-	}*/
-	
-	
-	
-    
-	
 	
 };

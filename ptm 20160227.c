@@ -99,7 +99,6 @@ void main() {
 	}*/
 	
 	fclose ( infile );
-	
 
 	for(j=0; j<count-1; j++){
 		nodesArray[j].pid = -1;
@@ -107,6 +106,7 @@ void main() {
 
 	
 	// starting processes
+
 	pid_t pid;
 	int numLeftToProcess = count -1;
 	int currNode = 0;
@@ -131,39 +131,66 @@ void main() {
 			
 			if (toExecuteNow[k] == 1) { // STATUS: READY
 
-				pid = fork(); // fork
-				nodesArray[k].pid = pid;
-
+				pid = fork();
+				
 				if (pid >= 0){
 
 				    if (pid == 0) {
 					
-					//nodesArray[k].status = 2; // STATUS: RUNNING
-					nodesArray[k].pid = getpid();
 					printf("'***'Executing Node %d now...\n", nodesArray[k].id);
 					printf("Child status: RUNNING // Node %d (%d) \n", nodesArray[k].id, getpid());
-					
-					// Redirection
+
+					printf("\n%s\n", nodesArray[k].prog);
+
+					/****************
+					*  -----------  *
+					*  Redirection  *
+					*  -----------  *
+					/***************/
+
 					int status;
-					if (strcmp(nodesArray[k].input, "stdin") == 0) {
-						if (strcmp(nodesArray[k].output, "stdout") == 0) {
-							status = dup2(1, 0); // (1) stdin to stdout
+
+						if (strcmp(nodesArray[k].input, "stdin") == 0) {
+
+							// (1) stdin to output file
+							if (strcmp(nodesArray[k].output, "stdout") != 0) {
+								int fd_out = open(nodesArray[k].output, O_WRONLY );
+								status = dup2(fd_out, 1);
+								close(fd_out);
+								system(nodesArray[k].prog);
+							}
 						}
-						else { // use output file
-							int fd_out = open(nodesArray[k].output, O_WRONLY ); // writing only
-							status = dup2(fd_out, 0); // (2) stdin to output file
-						}
+						else {
+							int fd_in = open(nodesArray[k].input, O_RDONLY );
+
+							// (2) input file to stdout
+							if (strcmp(nodesArray[k].output, "stdout") == 0) {
+								status = dup2(STDOUT_FILENO, fd_in);
+								close(fd_in);
+
+								char *temp = malloc(strlen(nodesArray[k].prog)+strlen(" ")+strlen(nodesArray[k].input)+1);//+1 for the zero-terminator
+								strcpy(temp, nodesArray[k].prog);
+								strcat(temp, " ");
+								strcat(temp, nodesArray[k].input);
+
+								system(temp);
+							}
+
+							// (3) input file to output file
+							else {
+
+								char *temp = malloc(strlen(nodesArray[k].prog)+strlen(" >  ")+strlen(nodesArray[k].input)+strlen(nodesArray[k].output)+1);//+1 for the zero-terminator
+								strcpy(temp, nodesArray[k].prog);
+								strcat(temp, " ");
+								strcat(temp, nodesArray[k].input);
+								strcat(temp, " > ");
+								strcat(temp, nodesArray[k].output);
+
+								system(temp);
+							}
+						
 					}
-					else { // use input file
-						int fd_in = open(nodesArray[k].input, O_RDONLY ); // reading only
-						if (strcmp(nodesArray[k].output, "stdout") == 0) {
-							status = dup2(1, fd_in); // (3) input file to stdout
-						}
-						else { // use output file
-							int fd_out = open(nodesArray[k].output, O_WRONLY ); // writing only
-							status = dup2(fd_out, fd_in); // (4) input file to output file
-						}
-					}
+
 					if (status == -1) {
 						perror("dup2(): ");
 					}
@@ -172,7 +199,6 @@ void main() {
 				    }
 
 				    else { // parent process
-					printf("Waiting for child to finish...\n");
 			
 					// wait for all children to finish processing
 					waitpid(pid, NULL, 0);
@@ -181,6 +207,8 @@ void main() {
 					// post-processing
 					numLeftToProcess--;
 					nodesArray[k].status = 3; // STATUS: FINISHED
+					nodesArray[k].pid=pid;
+					
 					
 					// set children of current Node to 'READY'
 					for (i=1; i<=nodesArray[k].num_children; i++) {
@@ -197,64 +225,7 @@ void main() {
 			}
 		
 		}
-		//numLeftToProcess--;
-		
-		//printf("currNode: %d\n", currNode);
 
-		// get PID for parent node
-		nodesArray[currNode].pid = getpid();
-		//printf("parentPID: %d\n", nodesArray[currNode].pid);
-
-		
-		//currNode += nodesArray[currNode].num_children;
 	};
-
-		
-		
-	
-
-	/*
-	for(i=0; i<count-1; i++){
-		
-		// fork() for node 0
-		if(i==0){
-			if(nodesArray[i].status == READY){
-				pid = fork();
-				if (pid >= 0){ //forking successful
-				    if (pid == 0) { // child process
-				        nodesArray[i].status = RUNNING;
-				        printf("Child process status: %d\n", nodesArray[i].status);
-				        nodesArray[i].pid = pid;
-				        printf("childPID: %d\n", pid);
-				        
-				        //TODO: execute program for this node
-				        
-				        nodesArray[i].status = FINISHED;
-				        printf("Child process status: %d\n", nodesArray[i].status);
-				    }
-				    else { // parent process
-				        printf("Parent process\n");
-				        waitpid(-1, NULL, 0);
-				        printf("Back to parent process\n");
-				    }
-				}
-				else { printf("Forking failed~\n");}
-			}
-		}
-		
-
-	}*/
-	
-	
-	
-    
-	
 	
 };
-
-
-
-// create a process // parallel processing
-// follow the requirements
-
-// output to sink.txt
