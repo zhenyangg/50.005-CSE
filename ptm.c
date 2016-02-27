@@ -29,7 +29,7 @@ struct Node {
 
 void main() {
 	FILE *infile;
-	infile = fopen("testproc.txt", "r");
+	infile = fopen("testcase2.txt", "r");
 	if (infile == NULL) { perror("File failed to open. Exiting..."); exit(-1);}
 
 	char str[30];
