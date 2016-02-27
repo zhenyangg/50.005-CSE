@@ -117,8 +117,8 @@ void main() {
 
 		// Select nodes to run
 		for(k=0; k<count-1; k++){
-			if (nodesArray[k].status == READY) { toExecuteNow[k] = READY;} // STATUS: READY (1)
-			else { toExecuteNow[k] = INELIGIBLE; } // STATUS: INELIGIBLE (1) or FINISHED (4)
+			if (nodesArray[k].status == READY) { toExecuteNow[k] = READY;}
+			else { toExecuteNow[k] = INELIGIBLE; }
 		}
 
 		// Loop through all nodes
