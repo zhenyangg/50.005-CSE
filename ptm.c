@@ -30,6 +30,7 @@ struct Node {
 void main() {
 	FILE *infile;
 	infile = fopen("testproc.txt", "r");
+	if (infile == NULL) { perror("File failed to open. Exiting..."); exit(-1);}
 
 	char str[30];
 	int count = 1, i, j, k;
@@ -154,7 +155,9 @@ void main() {
 								if (strcmp(nodesArray[k].output, "stdout") != 0) {
 									int fd_out = open(nodesArray[k].output, O_WRONLY );
 									status = dup2(fd_out, 1);
+									if (status == -1) { perror("dup2() redirection failed. Exiting..."); exit(-1);}
 									close(fd_out);
+
 									system(nodesArray[k].prog);
 								}
 							}
@@ -164,6 +167,7 @@ void main() {
 								// (2) input file to stdout
 								if (strcmp(nodesArray[k].output, "stdout") == 0) {
 									status = dup2(STDOUT_FILENO, fd_in);
+									if (status == -1) { perror("dup2() redirection failed. Exiting..."); exit(-1);}
 									close(fd_in);
 
 									char *temp = malloc(strlen(nodesArray[k].prog)+strlen(" ")+strlen(nodesArray[k].input)+1);//+1 for the zero-terminator
@@ -190,10 +194,8 @@ void main() {
 						}
 
 						// if redirection fails
-						if (status == -1) {
-							perror("dup2(): ");
-						}
 						
+
 						_exit(0);
 				    }
 
