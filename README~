@@ -28,11 +28,3 @@ To execute a graph of inter-dependent user programs in parallel
     before they themselves can be executed.
 (5) The last node, which doesn't have any child, will terminate the program after
     executing its command.
-
-
-*************
-**  FORMAT **
-*************
-
-<program name with arguments:list of children ID's:input file:output file>
-
