@@ -1,0 +1,6 @@
+git init
+git add -A
+git commit -m "hello"
+git add remote add 50.005 https://github.com/zhenyangg/50.005-CSE.git
+git pull 50.005
+git push 50.005 master
