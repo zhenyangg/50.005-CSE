@@ -2,37 +2,4 @@
 **  PURPOSE OF PROGRAM **
 *************************
 
-To execute a graph of inter-dependent user programs in parallel
-
-*********************************
-**  HOW TO COMPILE THE PROGRAM **
-*********************************
-
-(1) In Ubuntu, run Terminal
-(2) Change current directory to directory with ptm.c and testproc.txt.
-    ptm.c contains the source code for executing the graph of programs,
-    taking as input the variables stored in testproc.txt.
-(3) Compile program using command "gcc ptm.c -o hello"
-(4) Run program using command "./hello"
-
-
-*****************************
-**  WHAT THIS PROGRAM DOES **
-*****************************
-
-(1) It'll take as input a list of commands in a fixed format (format below),
-(2) Save the commands in an array of struct
-(3) Execute a graph of inter-dependent user programs in parallel in a systematic
-    way by checking which nodes are ready and which nodes are ineligible.
-(4) Children nodes have to wait for parent nodes to complete execution
-    before they themselves can be executed.
-(5) The last node, which doesn't have any child, will terminate the program after
-    executing its command.
-
-
-*************
-**  FORMAT **
-*************
-
-<program name with arguments:list of children ID's:input file:output file>
-
+50.005 Computer System Engineering Assignments
